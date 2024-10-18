@@ -1,7 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { db } from "../db/connection";
-import { User } from "../types/user";
 import dotenv from "dotenv";
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -67,77 +65,3 @@ export const registerUserService = async (userInfo: UserInfo) => {
   };
 };
 
-export const loginUserService = async ({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) => {
-  const loginDate = new Date();
-  if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined");
-  }
-
-  // Check if user exists
-  const findUserQuery = "SELECT * FROM users WHERE email = ?";
-  const [userRows] = await db.promise().execute<any[]>(findUserQuery, [email]);
-
-  if (userRows.length === 0) {
-    return {
-      status: "error",
-      statusCode: 401,
-      message: "Invalid email or password",
-      error: { code: 401, details: "User not found" },
-    };
-  }
-
-  const user: User = userRows[0];
-
-  if (!user.is_active) {
-    return {
-      status: "error",
-      statusCode: 403,
-      message: "Account is inactive. Please contact support.",
-      error: { code: 403, details: "Inactive account" },
-    };
-  }
-
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-  if (!isPasswordValid) {
-    return {
-      status: "error",
-      statusCode: 401,
-      message: "Invalid email or password",
-      error: { code: 401, details: "Incorrect password" },
-    };
-  }
-  // Generate JWT
-  const token = jwt.sign(
-    {
-      user_id: user.user_id,
-      email: user.email,
-    },
-    JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-
-  return {
-    status: "success",
-    statusCode: 200,
-    message: "Login successful",
-    data: {
-      token,
-      user_id: user.user_id,
-      email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      phone_number: user.phone_number,
-      is_active: user.is_active === 1,
-      last_login: loginDate,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    },
-  };
-};

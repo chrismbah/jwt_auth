@@ -1,5 +1,10 @@
 import { Response, Request } from "express";
-import { registerUserService, loginUserService } from "../services/auth";
+import { registerUserService } from "../services/registerUser";
+import { loginUserService } from "../services/loginUser";
+import {
+  updatePassword,
+  sendPasswordResetEmail,
+} from "../services/forgotPassword";
 
 type UserInfo = {
   email: string;
@@ -57,6 +62,50 @@ export const loginUser = async (
     return res.status(result.statusCode).json(result);
   } catch (error) {
     console.error("Error during user login:", error);
+    return res.status(500).json({
+      status: "error",
+      statusCode: 500,
+      message: "Server Error",
+      error: {
+        code: 500,
+        details: "An unexpected error occurred while processing the request.",
+      },
+    });
+  }
+};
+
+export const forgotPassword = async (
+  req: Request<{}, {}, { email: string }>,
+  res: Response
+) => {
+  const { email } = req.body;
+  try {
+    const result = await sendPasswordResetEmail(email);
+    return res.status(result.statusCode).json(result);
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      statusCode: 500,
+      message: "Server Error",
+      error: {
+        code: 500,
+        details: "An unexpected error occurred while processing the request.",
+      },
+    });
+  }
+};
+
+export const resetPassword = async (
+  req: Request<{}, {}, { newPassword: string; token: string }>,
+  res: Response
+) => {
+  const { token, newPassword } = req.body;
+  try {
+    // Call service to verify token and update password
+    const result = await updatePassword(token, newPassword);
+    return res.status(result.statusCode).json(result);
+  } catch (error) {
+    console.error("Error during password reset:", error);
     return res.status(500).json({
       status: "error",
       statusCode: 500,
