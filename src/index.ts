@@ -4,7 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import routes from "./routes";
 
-const app: Application = express();
+export const app: Application = express();
 dotenv.config();
 
 const port = process.env.PORT ?? 3001;
@@ -15,7 +15,7 @@ app.use(cookieParser());
 app.use(routes);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript with Express!");
+  res.send({ name: "John Doe" });
 });
 
 app.listen(port, () => {

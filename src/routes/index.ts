@@ -1,6 +1,6 @@
 import { Router } from "express";
-import authRoutes from "./auth";
-import profileRoutes from "./profile"
+import authRoutes from "./auth.routes";
+import profileRoutes from "./profile.routes"
 
 const router = Router();
 router.use("/api/v1/auth", authRoutes);

@@ -8,3 +8,5 @@ coverage/
 .DS_Store
 *.sublime-workspace
 *.sublime-project
+coverage
+jest.config.js

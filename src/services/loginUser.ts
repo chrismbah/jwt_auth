@@ -20,7 +20,6 @@ export const loginUserService = async ({
   if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
   }
-  // Check if user exists
   const [userRows] = await db
     .promise()
     .execute<any[]>(FIND_USER_BY_EMAIL, [email]);
