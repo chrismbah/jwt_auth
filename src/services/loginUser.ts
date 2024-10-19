@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { db } from "../db/connection";
 import { User } from "../types/user";
 import dotenv from "dotenv";
+import { FIND_USER_BY_EMAIL } from "../db/queries";
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -20,8 +21,9 @@ export const loginUserService = async ({
     throw new Error("JWT_SECRET is not defined");
   }
   // Check if user exists
-  const findUserQuery = "SELECT * FROM users WHERE email = ?";
-  const [userRows] = await db.promise().execute<any[]>(findUserQuery, [email]);
+  const [userRows] = await db
+    .promise()
+    .execute<any[]>(FIND_USER_BY_EMAIL, [email]);
 
   if (userRows.length === 0) {
     return {

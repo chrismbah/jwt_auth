@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import { db } from "../db/connection";
+import { FIND_USER_BY_EMAIL } from "../db/queries";
 import dotenv from "dotenv";
 dotenv.config();
-const JWT_SECRET = process.env.JWT_SECRET;
+
 
 interface UserInfo {
   email: string;
@@ -12,12 +13,11 @@ interface UserInfo {
 }
 export const registerUserService = async (userInfo: UserInfo) => {
   const { email, password, first_name, last_name } = userInfo;
-  const checkUserQuery = "SELECT * FROM users WHERE email = ?";
-  const [existingUsers] = await db
+  const [users] = await db
     .promise()
-    .execute<any[]>(checkUserQuery, [email]);
+    .execute<any[]>(FIND_USER_BY_EMAIL, [email]);
 
-  if (existingUsers.length > 0) {
+  if (users.length > 0) {
     return {
       status: "error",
       statusCode: 409,

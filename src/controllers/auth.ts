@@ -4,7 +4,10 @@ import { loginUserService } from "../services/loginUser";
 import {
   updatePassword,
   sendPasswordResetEmail,
-} from "../services/forgotPassword";
+} from "../services/resetPassword";
+import { changeUserPassword } from "../services/changePassword";
+import { AuthRequest } from "../middlewares/validateToken";
+import { serverErrorMessage } from "../utils/serverErrorMessage";
 
 type UserInfo = {
   email: string;
@@ -28,15 +31,7 @@ export const registerUser = async (
     return res.status(result.statusCode).json(result);
   } catch (error) {
     console.error("Error during user registration:", error);
-    return res.status(500).json({
-      status: "error",
-      statusCode: 500,
-      message: "Server Error",
-      error: {
-        code: 500,
-        details: "An unexpected error occurred while processing the request.",
-      },
-    });
+    return res.status(500).json(serverErrorMessage);
   }
 };
 
@@ -57,24 +52,15 @@ export const loginUser = async (
         },
       });
     }
-
     const result = await loginUserService({ email, password });
     return res.status(result.statusCode).json(result);
   } catch (error) {
     console.error("Error during user login:", error);
-    return res.status(500).json({
-      status: "error",
-      statusCode: 500,
-      message: "Server Error",
-      error: {
-        code: 500,
-        details: "An unexpected error occurred while processing the request.",
-      },
-    });
+    return res.status(500).json(serverErrorMessage);
   }
 };
 
-export const forgotPassword = async (
+export const requestPasswordReset = async (
   req: Request<{}, {}, { email: string }>,
   res: Response
 ) => {
@@ -83,15 +69,7 @@ export const forgotPassword = async (
     const result = await sendPasswordResetEmail(email);
     return res.status(result.statusCode).json(result);
   } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      statusCode: 500,
-      message: "Server Error",
-      error: {
-        code: 500,
-        details: "An unexpected error occurred while processing the request.",
-      },
-    });
+    return res.status(500).json(serverErrorMessage);
   }
 };
 
@@ -106,14 +84,20 @@ export const resetPassword = async (
     return res.status(result.statusCode).json(result);
   } catch (error) {
     console.error("Error during password reset:", error);
-    return res.status(500).json({
-      status: "error",
-      statusCode: 500,
-      message: "Server Error",
-      error: {
-        code: 500,
-        details: "An unexpected error occurred while processing the request.",
-      },
-    });
+    return res.status(500).json(serverErrorMessage);
+  }
+};
+
+export const changePassword = async (req: AuthRequest, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = req.user;
+  console.log(oldPassword);
+  console.log(newPassword);
+  console.log(user);
+  try {
+    const result = await changeUserPassword(oldPassword, newPassword, user);
+    return res.status(result.statusCode).json(result);
+  } catch (err) {
+    return res.status(500).json(serverErrorMessage);
   }
 };
