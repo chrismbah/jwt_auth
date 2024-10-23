@@ -18,6 +18,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send({ name: "John Doe" });
 });
 
-// app.listen(port, () => {
-//   console.log(`Server is running on port ${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
